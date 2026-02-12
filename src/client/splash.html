@@ -13,49 +13,54 @@
     <title>RuffleXP - Wojak Edition</title>
   </head>
   <body class="app">
-    <div class="wojak-container">
-      <div class="wojak-face">
-        <div class="wojak-head"></div>
-        <div class="wojak-eyes">
-          <div class="eye left-eye"></div>
-          <div class="eye right-eye"></div>
-        </div>
-        <div class="wojak-mouth"></div>
-      </div>
-    </div>
     <div class="content">
       <h1 class="title" id="title">MemeJak</h1>
     </div>
     <div class="button-container">
       <button class="start-button" id="start-button">Start Suffering</button>
-      <button class="leaderboard-button" id="leaderboard-button">🏆 Leaderboard</button>
+      <button class="leaderboard-button" id="leaderboard-button">Leaderboard</button>
     </div>
     
     <!-- Difficulty Selection Modal -->
     <div class="difficulty-modal" id="difficulty-modal" style="display: none;">
       <div class="modal-content">
-        <h2 class="modal-title">Choose Your Suffering</h2>
+        <div class="title-column"><h2 class="modal-title">Choose Your Suffering</h2>
+        </div>
+        
         <div class="difficulty-options">
           <button class="difficulty-option" data-difficulty="3" id="modal-easy">
-            <span class="difficulty-name">Easy</span>
-            <span class="difficulty-size">3x3</span>
+            <img src="/wojak-easy.png" class="difficulty-icon" alt="Easy">
+            <div class="difficulty-text">
+              <span class="difficulty-name">Easy</span>
+              <span class="difficulty-size">3x3</span>
+            </div>
           </button>
+          
           <button class="difficulty-option" data-difficulty="4" id="modal-medium">
-            <span class="difficulty-name">Medium</span>
-            <span class="difficulty-size">4x4</span>
+            <img src="/wojak-medium.png" class="difficulty-icon" alt="Medium">
+            <div class="difficulty-text">
+              <span class="difficulty-name">Medium</span>
+              <span class="difficulty-size">4x4</span>
+            </div>
           </button>
+          
           <button class="difficulty-option" data-difficulty="5" id="modal-hard">
-            <span class="difficulty-name">Hard</span>
-            <span class="difficulty-size">5x5</span>
+            <img src="/wojak-hard.png" class="difficulty-icon" alt="Hard">
+            <div class="difficulty-text">
+              <span class="difficulty-name">Hard</span>
+              <span class="difficulty-size">5x5</span>
+            </div>
           </button>
+          
         </div>
+        <button class="back-button" id="back-difficulty">Back</button>
       </div>
     </div>
     
     <!-- Leaderboard Modal -->
     <div class="leaderboard-modal" id="leaderboard-modal" style="display: none;">
       <div class="modal-content leaderboard-content">
-        <h2 class="modal-title">🏆 Leaderboard</h2>
+        <h2 class="modal-title">Leaderboard</h2>
         <div class="leaderboard-filters">
           <button class="filter-btn active" data-difficulty="3" id="filter-easy">Easy</button>
           <button class="filter-btn" data-difficulty="4" id="filter-medium">Medium</button>

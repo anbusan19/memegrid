@@ -11,6 +11,7 @@ const difficultyOptions = document.querySelectorAll('.difficulty-option') as Nod
 const leaderboardModal = document.getElementById('leaderboard-modal') as HTMLDivElement;
 const leaderboardList = document.getElementById('leaderboard-list') as HTMLDivElement;
 const closeLeaderboardButton = document.getElementById('close-leaderboard') as HTMLButtonElement;
+const backDifficultyButton = document.getElementById('back-difficulty') as HTMLButtonElement;
 const filterButtons = document.querySelectorAll('.filter-btn') as NodeListOf<HTMLButtonElement>;
 
 // Show difficulty modal when start button is clicked
@@ -42,6 +43,11 @@ difficultyModal.addEventListener('click', (e) => {
   if (e.target === difficultyModal) {
     difficultyModal.style.display = 'none';
   }
+});
+
+// Close difficulty modal when back button is clicked
+backDifficultyButton.addEventListener('click', () => {
+  difficultyModal.style.display = 'none';
 });
 
 // Leaderboard functionality

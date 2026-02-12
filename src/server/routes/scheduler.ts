@@ -37,19 +37,21 @@ export async function fetchDailyPuzzle(): Promise<{ success: boolean; message: s
     }
 
     // Get image URL from post
-    // Try thumbnail first, then preview, then fallback to URL
+    // Priority: full-res preview > direct image URL > thumbnail (last resort)
+    // Thumbnails are ~140px and look pixelated when stretched across the puzzle grid.
     let imageUrl: string | undefined;
-    
-    if (post.thumbnail?.url && post.thumbnail.url !== 'self' && post.thumbnail.url !== 'default') {
-      imageUrl = post.thumbnail.url;
-    } else if (post.preview?.images?.[0]?.source?.url) {
-      // Reddit preview URLs are often HTML-encoded, decode them
+
+    if (post.preview?.images?.[0]?.source?.url) {
+      // Reddit preview source is the full-resolution version
       let previewUrl = post.preview.images[0].source.url;
       // Decode HTML entities (common in Reddit preview URLs)
       previewUrl = previewUrl.replace(/&amp;/g, '&');
       imageUrl = previewUrl;
     } else if (post.url && /\.(jpg|jpeg|png|gif|webp)$/i.test(post.url)) {
       imageUrl = post.url;
+    } else if (post.thumbnail?.url && post.thumbnail.url !== 'self' && post.thumbnail.url !== 'default') {
+      // Thumbnail is the lowest quality – only use as a last resort
+      imageUrl = post.thumbnail.url;
     }
     
     // Log post details for debugging

@@ -14,12 +14,29 @@
   height: 100vh;
   margin: 0;
   gap: 20px;
-  background: #ffffff;
-  background-image: radial-gradient(circle, #000000 1px, transparent 1px);
-  background-size: 20px 20px;
+
+  background-color: #ffffff;
+
+  background-image: 
+    url("public/splashdesign.png"), /* TOP layer */
+    radial-gradient(circle, #000000 1px, transparent 1px); /* bottom grid */
+
+  background-size: 
+    cover,      /* image */
+    20px 20px;  /* grid */
+
+  background-position: 
+    center,
+    0 0;
+
+  background-repeat: 
+    no-repeat,
+    repeat;
+
   color: #000000;
   overflow: hidden;
 }
+
 
 /* Wojak Face CSS Art */
 .wojak-container {
@@ -98,6 +115,22 @@
   background: transparent;
 }
 
+.splash-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  margin-bottom: 10px;
+}
+
+.splash-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 40vh;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
 .content {
   display: flex;
   flex-direction: column;
@@ -107,7 +140,7 @@
 }
 
 .title {
-  font-size: 2.5em;
+  font-size: 2em;
   font-weight: bold;
   text-align: center;
   color: #000000;
@@ -156,7 +189,7 @@
   border: 3px solid #000000;
   padding: 12px 24px;
   height: auto;
-  font-size: 1.2em;
+  font-size: 1em;
   font-weight: bold;
   border-radius: 8px;
   cursor: pointer;
@@ -187,7 +220,7 @@
   border: 3px solid #000000;
   padding: 12px 24px;
   height: auto;
-  font-size: 1em;
+  font-size: 0.85em;
   font-weight: bold;
   border-radius: 8px;
   cursor: pointer;
@@ -265,10 +298,15 @@
   padding: 40px;
   border-radius: 12px;
   text-align: center;
-  max-width: 400px;
+  max-width: 750px;
   width: 90%;
   border: 3px solid #000000;
   box-shadow: 6px 6px 0px #000000;
+  display: flex;
+  flex-direction: row;        /* two columns */
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-title {
@@ -277,19 +315,40 @@
   color: #000000;
   text-shadow: 2px 2px 0px #ffffff, 4px 4px 0px rgba(255, 255, 255, 0.3);
   letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* Difficulty modal specific title styling */
+.difficulty-modal .modal-title {
+  font-size: 1.2em;
+  margin-bottom: 0;
+  letter-spacing: 1px;
+  flex: 1;
+  text-align: right;
+  font-size: 1.3em;
+}
+
+/* Leaderboard modal specific title styling */
+.leaderboard-content .modal-title {
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  text-align: center;
 }
 
 .difficulty-options {
+  flex: 2;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 18px;
+  width: 100%;
 }
 
 .difficulty-option {
   background-color: #ffffff;
   color: #000000;
   border: 3px solid #000000;
-  padding: 20px;
+  padding: 18px 20px;
   font-size: 1em;
   font-weight: bold;
   border-radius: 8px;
@@ -299,9 +358,11 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 18px;
+  width: 100%;
+  justify-content: flex-start;
 }
 
 .difficulty-option:hover {
@@ -316,12 +377,44 @@
 }
 
 .difficulty-name {
-  font-size: 1.2em;
+  font-size: 1em;
+  white-space: nowrap;
 }
 
 .difficulty-size {
-  font-size: 0.8em;
+  font-size: 0.75em;
   opacity: 0.8;
+  white-space: nowrap;
+}
+
+.difficulty-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  flex: 1;
+}
+
+.difficulty-icon {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  image-rendering: pixelated;   /* keeps pixel-art crisp */
+  filter: grayscale(100%) contrast(200%);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  display: block;
+}
+
+.difficulty-option:hover .difficulty-icon {
+  transform: scale(1.1);
+}
+
+.title-column {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 600px) {
@@ -353,9 +446,20 @@
     margin-bottom: 20px;
   }
 
+  .difficulty-options {
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
   .difficulty-option {
     padding: 15px;
     font-size: 0.8em;
+    gap: 15px;
+  }
+
+  .difficulty-icon {
+    width: 60px;
+    height: 60px;
   }
 
   .difficulty-name {
@@ -374,19 +478,29 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: #ffffff;
+  background-image: radial-gradient(circle, #000000 1px, transparent 1px);
+  background-size: 20px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1001;
-  backdrop-filter: blur(4px);
 }
 
 .leaderboard-content {
-  max-width: 600px;
+  max-width: 500px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+  display: flex;
+  flex-direction: column;
 }
 
 .leaderboard-filters {
@@ -439,19 +553,25 @@
   min-height: 200px;
   max-height: 400px;
   overflow-y: auto;
+  overflow-x: hidden;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .leaderboard-entry {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 12px;
   align-items: center;
-  padding: 12px;
+  padding: 12px 16px;
   margin-bottom: 8px;
   background: #ffffff;
   border: 2px solid #000000;
   border-radius: 6px;
   font-size: 0.7em;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .leaderboard-entry.rank-1 {
@@ -471,26 +591,31 @@
 
 .leaderboard-rank {
   font-weight: bold;
-  min-width: 30px;
   text-align: center;
+  font-size: 0.9em;
 }
 
 .leaderboard-username {
-  flex: 1;
-  margin-left: 10px;
   font-weight: bold;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .leaderboard-stats {
   display: flex;
-  gap: 15px;
-  font-size: 0.8em;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  font-size: 0.65em;
+  min-width: 0;
 }
 
 .leaderboard-time,
 .leaderboard-moves {
-  min-width: 60px;
   text-align: right;
+  white-space: nowrap;
 }
 
 .close-button {
@@ -520,6 +645,34 @@
   box-shadow: 0px 0px 0px #000000;
 }
 
+.back-button {
+  width: 100%;
+  background-color: #ffffff;
+  color: #000000;
+  border: 3px solid #000000;
+  padding: 12px 24px;
+  font-size: 0.8em;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 3px 3px 0px #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+.back-button:hover {
+  background-color: #e0e0e0;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.back-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px #000000;
+}
+
 @media (max-width: 600px) {
   .leaderboard-button {
     font-size: 0.8em;
@@ -540,8 +693,15 @@
     padding: 10px;
   }
 
+  .leaderboard-entry {
+    grid-template-columns: 35px 1fr auto;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 0.6em;
+  }
+
   .leaderboard-stats {
-    flex-direction: column;
-    gap: 5px;
+    gap: 3px;
+    font-size: 0.6em;
   }
 }
