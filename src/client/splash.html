@@ -28,7 +28,46 @@
     </div>
     <div class="button-container">
       <button class="start-button" id="start-button">Start Suffering</button>
+      <button class="leaderboard-button" id="leaderboard-button">🏆 Leaderboard</button>
     </div>
+    
+    <!-- Difficulty Selection Modal -->
+    <div class="difficulty-modal" id="difficulty-modal" style="display: none;">
+      <div class="modal-content">
+        <h2 class="modal-title">Choose Your Suffering</h2>
+        <div class="difficulty-options">
+          <button class="difficulty-option" data-difficulty="3" id="modal-easy">
+            <span class="difficulty-name">Easy</span>
+            <span class="difficulty-size">3x3</span>
+          </button>
+          <button class="difficulty-option" data-difficulty="4" id="modal-medium">
+            <span class="difficulty-name">Medium</span>
+            <span class="difficulty-size">4x4</span>
+          </button>
+          <button class="difficulty-option" data-difficulty="5" id="modal-hard">
+            <span class="difficulty-name">Hard</span>
+            <span class="difficulty-size">5x5</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Leaderboard Modal -->
+    <div class="leaderboard-modal" id="leaderboard-modal" style="display: none;">
+      <div class="modal-content leaderboard-content">
+        <h2 class="modal-title">🏆 Leaderboard</h2>
+        <div class="leaderboard-filters">
+          <button class="filter-btn active" data-difficulty="3" id="filter-easy">Easy</button>
+          <button class="filter-btn" data-difficulty="4" id="filter-medium">Medium</button>
+          <button class="filter-btn" data-difficulty="5" id="filter-hard">Hard</button>
+        </div>
+        <div class="leaderboard-list" id="leaderboard-list">
+          <div class="loading">Loading leaderboard...</div>
+        </div>
+        <button class="close-button" id="close-leaderboard">Close</button>
+      </div>
+    </div>
+    
     <script type="module" src="splash.ts" defer></script>
   </body>
 </html>

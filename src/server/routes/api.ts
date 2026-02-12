@@ -6,6 +6,12 @@ import type {
   InitResponse,
   DailyStateResponse,
   DailyStateErrorResponse,
+  LeaderboardEntry,
+  SubmitScoreRequest,
+  SubmitScoreResponse,
+  SubmitScoreErrorResponse,
+  LeaderboardResponse,
+  LeaderboardErrorResponse,
 } from '../../shared/api';
 import type { DailyState } from '../../shared/puzzle';
 
@@ -141,6 +147,167 @@ api.get('/daily-state', async (c) => {
       {
         status: 'error',
         message: `Failed to fetch daily state: ${errorMessage}`,
+      },
+      500
+    );
+  }
+});
+
+/**
+ * Submit a score to the leaderboard
+ */
+api.post('/submit-score', async (c) => {
+  try {
+    const body = await c.req.json<SubmitScoreRequest>();
+    const { time, moves, difficulty } = body;
+
+    if (!time || !moves || !difficulty) {
+      return c.json<SubmitScoreErrorResponse>(
+        {
+          status: 'error',
+          message: 'Missing required fields: time, moves, difficulty',
+        },
+        400
+      );
+    }
+
+    // Get current user
+    const username = await reddit.getCurrentUsername();
+    if (!username) {
+      return c.json<SubmitScoreErrorResponse>(
+        {
+          status: 'error',
+          message: 'Unable to get username',
+        },
+        401
+      );
+    }
+
+    // Get today's date
+    const today = new Date().toISOString().split('T')[0];
+
+    // Create leaderboard entry
+    const entry: LeaderboardEntry = {
+      username,
+      time,
+      moves,
+      difficulty,
+      date: today,
+    };
+
+    // Get current leaderboard for this date and difficulty
+    const leaderboardKey = `leaderboard:${today}:${difficulty}`;
+    const leaderboardStr = await redis.get(leaderboardKey);
+    let leaderboard: LeaderboardEntry[] = leaderboardStr
+      ? JSON.parse(leaderboardStr)
+      : [];
+
+    // Check if user already has an entry for today
+    const existingIndex = leaderboard.findIndex(
+      (e) => e.username === username
+    );
+
+    // If user has a better score (lower time, or same time with fewer moves), update it
+    if (existingIndex >= 0) {
+      const existing = leaderboard[existingIndex];
+      if (
+        time < existing.time ||
+        (time === existing.time && moves < existing.moves)
+      ) {
+        leaderboard[existingIndex] = entry;
+      } else {
+        // User's existing score is better, don't update
+        const rank =
+          leaderboard.filter(
+            (e) =>
+              e.time < existing.time ||
+              (e.time === existing.time && e.moves < existing.moves)
+          ).length + 1;
+        return c.json<SubmitScoreResponse>({
+          status: 'success',
+          rank,
+          message: 'Your existing score is better',
+        });
+      }
+    } else {
+      // New entry
+      leaderboard.push(entry);
+    }
+
+    // Sort leaderboard: first by time (ascending), then by moves (ascending)
+    leaderboard.sort((a, b) => {
+      if (a.time !== b.time) {
+        return a.time - b.time;
+      }
+      return a.moves - b.moves;
+    });
+
+    // Keep only top 100 entries
+    leaderboard = leaderboard.slice(0, 100);
+
+    // Save back to Redis
+    await redis.set(leaderboardKey, JSON.stringify(leaderboard));
+
+    // Find user's rank
+    const rank =
+      leaderboard.findIndex((e) => e.username === username) + 1;
+
+    return c.json<SubmitScoreResponse>({
+      status: 'success',
+      rank,
+      message: 'Score submitted successfully',
+    });
+  } catch (error) {
+    console.error('[API] Error submitting score:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json<SubmitScoreErrorResponse>(
+      {
+        status: 'error',
+        message: `Failed to submit score: ${errorMessage}`,
+      },
+      500
+    );
+  }
+});
+
+/**
+ * Get leaderboard for a specific date and difficulty
+ */
+api.get('/leaderboard', async (c) => {
+  try {
+    const date = c.req.query('date') || new Date().toISOString().split('T')[0];
+    const difficultyStr = c.req.query('difficulty') || '3';
+    const difficulty = Number.parseInt(difficultyStr) as 3 | 4 | 5;
+
+    if (difficulty !== 3 && difficulty !== 4 && difficulty !== 5) {
+      return c.json<LeaderboardErrorResponse>(
+        {
+          status: 'error',
+          message: 'Invalid difficulty. Must be 3, 4, or 5',
+        },
+        400
+      );
+    }
+
+    // Get leaderboard from Redis
+    const leaderboardKey = `leaderboard:${date}:${difficulty}`;
+    const leaderboardStr = await redis.get(leaderboardKey);
+    const leaderboard: LeaderboardEntry[] = leaderboardStr
+      ? JSON.parse(leaderboardStr)
+      : [];
+
+    return c.json<LeaderboardResponse>({
+      entries: leaderboard,
+      date,
+      difficulty,
+    });
+  } catch (error) {
+    console.error('[API] Error fetching leaderboard:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json<LeaderboardErrorResponse>(
+      {
+        status: 'error',
+        message: `Failed to fetch leaderboard: ${errorMessage}`,
       },
       500
     );

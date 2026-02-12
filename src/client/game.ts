@@ -2,6 +2,8 @@ import { exitExpandedMode } from '@devvit/web/client';
 import type {
   DailyStateResponse,
   DailyStateErrorResponse,
+  SubmitScoreRequest,
+  SubmitScoreResponse,
 } from '../shared/api';
 import {
   createShuffledPuzzle,
@@ -62,7 +64,6 @@ const resetButton = document.getElementById('reset-button') as HTMLButtonElement
 const backButton = document.getElementById('back-button') as HTMLButtonElement;
 const hintButton = document.getElementById('hint-button') as HTMLButtonElement;
 const hintContainer = document.querySelector('.hint-container') as HTMLDivElement;
-const difficultyButtons = document.querySelectorAll('.difficulty-btn') as NodeListOf<HTMLButtonElement>;
 
 /**
  * Fetch daily puzzle state from server
@@ -315,12 +316,48 @@ function handleTileClick(tileIndex: number): void {
 }
 
 /**
+ * Submit score to leaderboard
+ */
+async function submitScore(): Promise<void> {
+  if (!gameState.puzzle) return;
+  
+  try {
+    const scoreRequest: SubmitScoreRequest = {
+      time: gameState.stats.elapsedTime,
+      moves: gameState.stats.moves,
+      difficulty: gameState.difficulty,
+    };
+    
+    const response = await fetch('/api/submit-score', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(scoreRequest),
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to submit score');
+      return;
+    }
+    
+    const result = (await response.json()) as SubmitScoreResponse;
+    console.log(`Score submitted! Rank: #${result.rank}`);
+  } catch (error) {
+    console.error('Error submitting score:', error);
+  }
+}
+
+/**
  * Show solved overlay
  */
 function showSolvedOverlay(): void {
   finalTimeEl.textContent = formatTime(gameState.stats.elapsedTime);
   finalMovesEl.textContent = gameState.stats.moves.toString();
   solvedOverlay.style.display = 'flex';
+  
+  // Submit score to leaderboard
+  void submitScore();
 }
 
 /**
@@ -346,51 +383,6 @@ function resetPuzzle(): void {
   hintButton.disabled = false;
   
   renderPuzzle();
-}
-
-/**
- * Handle difficulty change
- */
-function handleDifficultyChange(newDifficulty: Difficulty): void {
-  if (gameState.difficulty === newDifficulty) return;
-  
-  gameState.difficulty = newDifficulty;
-  
-  // Update button states
-  difficultyButtons.forEach(btn => {
-    const btnDifficulty = Number.parseInt(btn.dataset.difficulty || '3') as Difficulty;
-    if (btnDifficulty === newDifficulty) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
-  });
-  
-  // Reset puzzle with new difficulty
-  if (gameState.dailyState) {
-    gameState.puzzle = createShuffledPuzzle(
-      newDifficulty,
-      gameState.dailyState.shuffleSeed
-    );
-    gameState.stats.moves = 0;
-    gameState.stats.startTime = 0;
-    gameState.stats.elapsedTime = 0;
-    gameState.isSolved = false;
-    gameState.hintActive = false;
-    
-    stopTimer();
-    updateMovesDisplay();
-    timeDisplay.textContent = '00:00';
-    solvedOverlay.style.display = 'none';
-    hintButton.disabled = false;
-    
-    // Reload image for new size
-    if (gameState.dailyState) {
-      void loadImageForCropping(gameState.dailyState.imageUrl, newDifficulty).then(() => {
-        renderPuzzle();
-      });
-    }
-  }
 }
 
 /**
@@ -478,11 +470,20 @@ async function initGame(): Promise<void> {
     errorEl.style.display = 'none';
     puzzleGrid.style.display = 'none';
     
+    // Get difficulty from localStorage (default to 3 if not set)
+    const storedDifficulty = localStorage.getItem('puzzleDifficulty');
+    if (storedDifficulty) {
+      const difficulty = Number.parseInt(storedDifficulty) as Difficulty;
+      if (difficulty === 3 || difficulty === 4 || difficulty === 5) {
+        gameState.difficulty = difficulty;
+      }
+    }
+    
     // Fetch daily state
     const dailyState = await fetchDailyState();
     gameState.dailyState = dailyState;
     
-    // Create shuffled puzzle with current difficulty
+    // Create shuffled puzzle with selected difficulty
     gameState.puzzle = createShuffledPuzzle(
       gameState.difficulty,
       dailyState.shuffleSeed
@@ -544,14 +545,6 @@ backButton.addEventListener('click', (e) => {
   void handleBackClick(e);
 });
 hintButton.addEventListener('click', showHint);
-
-// Difficulty selector event listeners
-difficultyButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const difficulty = Number.parseInt(btn.dataset.difficulty || '3') as Difficulty;
-    handleDifficultyChange(difficulty);
-  });
-});
 
 // Initialize on load
 void initGame();

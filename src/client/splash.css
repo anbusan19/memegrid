@@ -140,6 +140,10 @@
 .button-container {
   margin-top: 10px;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
 }
 
 .start-button {
@@ -169,6 +173,37 @@
 }
 
 .start-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+.leaderboard-button {
+  background-color: #ffffff;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: 3px solid #000000;
+  padding: 12px 24px;
+  height: auto;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 4px 4px 0px #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.leaderboard-button:hover {
+  background-color: #e0e0e0;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.leaderboard-button:active {
   transform: translate(4px, 4px);
   box-shadow: 0px 0px 0px #000000;
 }
@@ -210,6 +245,85 @@
   color: #444444;
 }
 
+/* Difficulty Selection Modal */
+.difficulty-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.modal-title {
+  font-size: 1.5em;
+  margin-bottom: 30px;
+  color: #000000;
+  text-shadow: 2px 2px 0px #ffffff, 4px 4px 0px rgba(255, 255, 255, 0.3);
+  letter-spacing: 2px;
+}
+
+.difficulty-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.difficulty-option {
+  background-color: #ffffff;
+  color: #000000;
+  border: 3px solid #000000;
+  padding: 20px;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 3px 3px 0px #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.difficulty-option:hover {
+  background-color: #e0e0e0;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.difficulty-option:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+.difficulty-name {
+  font-size: 1.2em;
+}
+
+.difficulty-size {
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
 @media (max-width: 600px) {
   .wojak-container {
     width: 150px;
@@ -228,5 +342,206 @@
   .start-button {
     font-size: 1em;
     padding: 10px 20px;
+  }
+
+  .modal-content {
+    padding: 30px 20px;
+  }
+
+  .modal-title {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+  }
+
+  .difficulty-option {
+    padding: 15px;
+    font-size: 0.8em;
+  }
+
+  .difficulty-name {
+    font-size: 1em;
+  }
+
+  .difficulty-size {
+    font-size: 0.7em;
+  }
+}
+
+/* Leaderboard Modal */
+.leaderboard-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  backdrop-filter: blur(4px);
+}
+
+.leaderboard-content {
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.leaderboard-filters {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.filter-btn {
+  background-color: #ffffff;
+  color: #000000;
+  border: 3px solid #000000;
+  padding: 8px 16px;
+  font-size: 0.7em;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 3px 3px 0px #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.filter-btn:hover {
+  background-color: #e0e0e0;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.filter-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+.filter-btn.active {
+  background-color: #000000;
+  color: #ffffff;
+  box-shadow: 3px 3px 0px #000000;
+}
+
+.filter-btn.active:hover {
+  background-color: #000000;
+  color: #ffffff;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.leaderboard-list {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.leaderboard-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 6px;
+  font-size: 0.7em;
+}
+
+.leaderboard-entry.rank-1 {
+  background: #ffd700;
+  border-color: #ff8c00;
+}
+
+.leaderboard-entry.rank-2 {
+  background: #c0c0c0;
+  border-color: #808080;
+}
+
+.leaderboard-entry.rank-3 {
+  background: #cd7f32;
+  border-color: #8b4513;
+}
+
+.leaderboard-rank {
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+}
+
+.leaderboard-username {
+  flex: 1;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+.leaderboard-stats {
+  display: flex;
+  gap: 15px;
+  font-size: 0.8em;
+}
+
+.leaderboard-time,
+.leaderboard-moves {
+  min-width: 60px;
+  text-align: right;
+}
+
+.close-button {
+  width: 100%;
+  background-color: #ffffff;
+  color: #000000;
+  border: 3px solid #000000;
+  padding: 12px 24px;
+  font-size: 0.8em;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 3px 3px 0px #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.close-button:hover {
+  background-color: #e0e0e0;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.close-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+@media (max-width: 600px) {
+  .leaderboard-button {
+    font-size: 0.8em;
+    padding: 10px 20px;
+  }
+
+  .leaderboard-content {
+    padding: 20px 15px;
+  }
+
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 0.6em;
+  }
+
+  .leaderboard-entry {
+    font-size: 0.6em;
+    padding: 10px;
+  }
+
+  .leaderboard-stats {
+    flex-direction: column;
+    gap: 5px;
   }
 }

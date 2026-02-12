@@ -2,16 +2,14 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: "Press Start 2P", monospace;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #1a1a1a;
-  color: #ffffff;
+  background: #ffffff;
+  background-image: radial-gradient(circle, #000000 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: #000000;
   overflow: hidden;
   height: 100vh;
   width: 100vw;
@@ -39,25 +37,29 @@ body {
 .back-button {
   position: absolute;
   left: 0;
-  background: transparent;
-  border: none;
-  color: #ffffff;
+  background: #ffffff;
+  border: 3px solid #000000;
+  color: #000000;
   cursor: pointer;
   padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition: all 0.2s ease;
   z-index: 10;
+  box-shadow: 2px 2px 0px #000000;
 }
 
 .back-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #e0e0e0;
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #000000;
 }
 
 .back-button:active {
-  transform: scale(0.95);
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px #000000;
 }
 
 .back-button svg {
@@ -65,11 +67,13 @@ body {
 }
 
 .title {
-  font-size: 28px;
+  font-size: 1.5em;
   font-weight: bold;
-  color: #ff4500;
+  color: #000000;
   flex: 1;
   text-align: center;
+  text-shadow: 2px 2px 0px #ffffff, 4px 4px 0px rgba(255, 255, 255, 0.3);
+  letter-spacing: 2px;
 }
 
 .stats {
@@ -84,47 +88,16 @@ body {
 }
 
 .stat-label {
-  font-size: 12px;
-  color: #888;
+  font-size: 0.6em;
+  color: #000000;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: 1em;
   font-weight: bold;
-  color: #ffffff;
-}
-
-.difficulty-selector {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 20px;
-  flex-shrink: 0;
-}
-
-.difficulty-btn {
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: bold;
-  background: #2a2a2a;
-  color: #ffffff;
-  border: 2px solid #444;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.difficulty-btn:hover {
-  background: #333;
-  border-color: #666;
-}
-
-.difficulty-btn.active {
-  background: #ff4500;
-  border-color: #ff4500;
-  color: #ffffff;
+  color: #000000;
 }
 
 .puzzle-container {
@@ -147,40 +120,51 @@ body {
 }
 
 .hint-button {
+  background-color: #ffffff;
+  color: #000000;
+  border: 3px solid #000000;
   padding: 10px 20px;
-  font-size: 16px;
+  font-size: 0.8em;
   font-weight: bold;
-  background: #2a2a2a;
-  color: #ffffff;
-  border: 2px solid #ff4500;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 3px 3px 0px #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .hint-button:hover {
-  background: #ff4500;
-  transform: scale(1.05);
+  background-color: #e0e0e0;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
 }
 
 .hint-button:active {
-  transform: scale(0.98);
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px #000000;
 }
 
 .hint-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+}
+
+.hint-button:disabled:hover {
+  transform: none;
+  box-shadow: 3px 3px 0px #000000;
 }
 
 .loading,
 .error {
   text-align: center;
-  font-size: 18px;
-  color: #888;
+  font-size: 0.9em;
+  color: #000000;
 }
 
 .error {
-  color: #ff4500;
+  color: #000000;
 }
 
 .puzzle-grid {
@@ -189,9 +173,11 @@ body {
   width: 100%;
   max-width: 500px;
   aspect-ratio: 1;
-  background: #2a2a2a;
+  background: #000000;
   padding: 4px;
   border-radius: 8px;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
 }
 
 .puzzle-grid.size-3 {
@@ -210,23 +196,24 @@ body {
 }
 
 .puzzle-tile.hint-highlight {
-  outline: 3px solid #ff4500;
+  outline: 3px solid #000000;
   outline-offset: -3px;
   animation: hint-pulse 1s ease-in-out infinite;
 }
 
 @keyframes hint-pulse {
   0%, 100% {
-    outline-color: #ff4500;
+    outline-color: #000000;
   }
   50% {
-    outline-color: #ff6600;
+    outline-color: #666666;
   }
 }
 
 .puzzle-tile {
   position: relative;
-  background: #1a1a1a;
+  background: #ffffff;
+  border: 2px solid #000000;
   border-radius: 4px;
   overflow: hidden;
   cursor: pointer;
@@ -240,7 +227,8 @@ body {
 }
 
 .puzzle-tile.empty {
-  background: #2a2a2a;
+  background: #f0f0f0;
+  border: 2px solid #000000;
   cursor: default;
 }
 
@@ -267,7 +255,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,45 +263,54 @@ body {
 }
 
 .solved-content {
-  background: #2a2a2a;
+  background: #ffffff;
   padding: 40px;
   border-radius: 12px;
   text-align: center;
   max-width: 400px;
   width: 90%;
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
 }
 
 .solved-content h2 {
-  font-size: 32px;
+  font-size: 1.5em;
   margin-bottom: 20px;
-  color: #ff4500;
+  color: #000000;
+  text-shadow: 2px 2px 0px #ffffff, 4px 4px 0px rgba(255, 255, 255, 0.3);
 }
 
 .solved-content p {
-  font-size: 18px;
+  font-size: 0.9em;
   margin: 10px 0;
-  color: #ffffff;
+  color: #000000;
 }
 
 .reset-button {
   margin-top: 20px;
   padding: 12px 24px;
-  font-size: 16px;
+  font-size: 0.8em;
   font-weight: bold;
-  background: #ff4500;
-  color: #ffffff;
-  border: none;
+  background: #ffffff;
+  color: #000000;
+  border: 3px solid #000000;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 3px 3px 0px #000000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .reset-button:hover {
-  background: #ff5500;
+  background: #e0e0e0;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
 }
 
 .reset-button:active {
-  transform: scale(0.98);
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px #000000;
 }
 
 @media (max-width: 600px) {
@@ -322,26 +319,20 @@ body {
   }
 
   .title {
-    font-size: 24px;
+    font-size: 1.2em;
+  }
+
+  .stat-label {
+    font-size: 0.5em;
   }
 
   .stat-value {
-    font-size: 18px;
-  }
-
-  .difficulty-selector {
-    gap: 6px;
-    margin-bottom: 15px;
-  }
-
-  .difficulty-btn {
-    padding: 6px 12px;
-    font-size: 12px;
+    font-size: 0.8em;
   }
 
   .hint-button {
     padding: 8px 16px;
-    font-size: 14px;
+    font-size: 0.7em;
   }
 
   .puzzle-grid {
@@ -356,5 +347,18 @@ body {
   .back-button svg {
     width: 20px;
     height: 20px;
+  }
+
+  .solved-content h2 {
+    font-size: 1.2em;
+  }
+
+  .solved-content p {
+    font-size: 0.8em;
+  }
+
+  .reset-button {
+    font-size: 0.7em;
+    padding: 10px 20px;
   }
 }
