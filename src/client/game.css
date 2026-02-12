@@ -33,12 +33,43 @@ body {
   align-items: center;
   margin-bottom: 20px;
   flex-shrink: 0;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  left: 0;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.2s ease, transform 0.1s ease;
+  z-index: 10;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.back-button:active {
+  transform: scale(0.95);
+}
+
+.back-button svg {
+  display: block;
 }
 
 .title {
   font-size: 28px;
   font-weight: bold;
   color: #ff4500;
+  flex: 1;
+  text-align: center;
 }
 
 .stats {
@@ -65,12 +96,80 @@ body {
   color: #ffffff;
 }
 
+.difficulty-selector {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.difficulty-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 2px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.difficulty-btn:hover {
+  background: #333;
+  border-color: #666;
+}
+
+.difficulty-btn.active {
+  background: #ff4500;
+  border-color: #ff4500;
+  color: #ffffff;
+}
+
 .puzzle-container {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 0;
+}
+
+.hint-container {
+  margin-bottom: 15px;
+  flex-shrink: 0;
+  display: none;
+}
+
+.hint-container.visible {
+  display: block;
+}
+
+.hint-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 2px solid #ff4500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hint-button:hover {
+  background: #ff4500;
+  transform: scale(1.05);
+}
+
+.hint-button:active {
+  transform: scale(0.98);
+}
+
+.hint-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .loading,
@@ -86,8 +185,6 @@ body {
 
 .puzzle-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
   gap: 4px;
   width: 100%;
   max-width: 500px;
@@ -95,6 +192,36 @@ body {
   background: #2a2a2a;
   padding: 4px;
   border-radius: 8px;
+}
+
+.puzzle-grid.size-3 {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.puzzle-grid.size-4 {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+.puzzle-grid.size-5 {
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+}
+
+.puzzle-tile.hint-highlight {
+  outline: 3px solid #ff4500;
+  outline-offset: -3px;
+  animation: hint-pulse 1s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+  0%, 100% {
+    outline-color: #ff4500;
+  }
+  50% {
+    outline-color: #ff6600;
+  }
 }
 
 .puzzle-tile {
@@ -202,8 +329,32 @@ body {
     font-size: 18px;
   }
 
+  .difficulty-selector {
+    gap: 6px;
+    margin-bottom: 15px;
+  }
+
+  .difficulty-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .hint-button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
   .puzzle-grid {
     gap: 2px;
     padding: 2px;
+  }
+
+  .back-button {
+    padding: 6px;
+  }
+
+  .back-button svg {
+    width: 20px;
+    height: 20px;
   }
 }

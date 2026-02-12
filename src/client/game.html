@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="game.css" />
     <meta charset="UTF-8" />
     <meta
@@ -16,6 +19,11 @@
   <body>
     <div class="game-container">
       <div class="header">
+        <button class="back-button" id="back-button" aria-label="Go back">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
         <h1 class="title">RuffleXP</h1>
         <div class="stats">
           <div class="stat">
@@ -29,9 +37,18 @@
         </div>
       </div>
       
+      <div class="difficulty-selector" id="difficulty-selector">
+        <button class="difficulty-btn active" data-difficulty="3" id="difficulty-easy">Easy (3x3)</button>
+        <button class="difficulty-btn" data-difficulty="4" id="difficulty-medium">Medium (4x4)</button>
+        <button class="difficulty-btn" data-difficulty="5" id="difficulty-hard">Hard (5x5)</button>
+      </div>
+      
       <div class="puzzle-container" id="puzzle-container">
         <div class="loading" id="loading">Loading daily puzzle...</div>
         <div class="error" id="error" style="display: none;"></div>
+        <div class="hint-container">
+          <button class="hint-button" id="hint-button">💡 Hint</button>
+        </div>
         <div class="puzzle-grid" id="puzzle-grid" style="display: none;"></div>
       </div>
       

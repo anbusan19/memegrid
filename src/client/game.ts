@@ -1,3 +1,4 @@
+import { exitExpandedMode } from '@devvit/web/client';
 import type {
   DailyStateResponse,
   DailyStateErrorResponse,
@@ -9,11 +10,12 @@ import {
   type PuzzleState,
 } from '../shared/puzzle';
 
-const PUZZLE_SIZE = 3;
+type Difficulty = 3 | 4 | 5;
 
 type GameState = {
   puzzle: PuzzleState | null;
   dailyState: DailyStateResponse | null;
+  difficulty: Difficulty;
   stats: {
     moves: number;
     startTime: number;
@@ -21,11 +23,13 @@ type GameState = {
   };
   isSolved: boolean;
   imageLoaded: boolean;
+  hintActive: boolean;
 };
 
 let gameState: GameState = {
   puzzle: null,
   dailyState: null,
+  difficulty: 3,
   stats: {
     moves: 0,
     startTime: 0,
@@ -33,7 +37,16 @@ let gameState: GameState = {
   },
   isSolved: false,
   imageLoaded: false,
+  hintActive: false,
 };
+
+// Store the original image URL and dimensions for CSS cropping
+let imageData: {
+  url: string;
+  width: number;
+  height: number;
+  squareSize: number;
+} | null = null;
 
 let timerInterval: number | null = null;
 
@@ -46,6 +59,10 @@ const solvedOverlay = document.getElementById('solved-overlay') as HTMLDivElemen
 const finalTimeEl = document.getElementById('final-time') as HTMLSpanElement;
 const finalMovesEl = document.getElementById('final-moves') as HTMLSpanElement;
 const resetButton = document.getElementById('reset-button') as HTMLButtonElement;
+const backButton = document.getElementById('back-button') as HTMLButtonElement;
+const hintButton = document.getElementById('hint-button') as HTMLButtonElement;
+const hintContainer = document.querySelector('.hint-container') as HTMLDivElement;
+const difficultyButtons = document.querySelectorAll('.difficulty-btn') as NodeListOf<HTMLButtonElement>;
 
 /**
  * Fetch daily puzzle state from server
@@ -108,40 +125,120 @@ function updateMovesDisplay(): void {
 }
 
 /**
+ * Load and measure the image to prepare for CSS-based cropping
+ */
+async function loadImageForCropping(
+  imageUrl: string,
+  size: number
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const tryLoad = (useCrossOrigin: boolean) => {
+      const img = new Image();
+      
+      if (useCrossOrigin) {
+        img.crossOrigin = 'anonymous';
+      }
+      
+      img.onload = () => {
+        // Calculate square dimensions (use the smaller dimension for center crop)
+        const minDimension = Math.min(img.width, img.height);
+        const squareSize = minDimension;
+        
+        // Calculate source crop offsets for center crop
+        const sourceX = (img.width - squareSize) / 2;
+        const sourceY = (img.height - squareSize) / 2;
+        
+        imageData = {
+          url: imageUrl,
+          width: img.width,
+          height: img.height,
+          squareSize: squareSize,
+        };
+        
+        console.log(`[IMAGE] Loaded image: ${img.width}x${img.height}, square: ${squareSize}x${squareSize}`);
+        console.log(`[IMAGE] Crop offset: (${sourceX}, ${sourceY})`);
+        resolve();
+      };
+      
+      img.onerror = () => {
+        if (useCrossOrigin) {
+          // Try again without crossOrigin
+          tryLoad(false);
+        } else {
+          reject(new Error('Failed to load image'));
+        }
+      };
+      
+      img.src = imageUrl;
+    };
+    
+    // Start with crossOrigin
+    tryLoad(true);
+  });
+}
+
+/**
  * Create a tile element for the puzzle
  */
 function createTileElement(
   tileValue: number,
-  imageUrl: string,
   size: number,
-  isEmpty: boolean
+  isEmpty: boolean,
+  gridIndex?: number
 ): HTMLDivElement {
   const tile = document.createElement('div');
   tile.className = `puzzle-tile ${isEmpty ? 'empty' : ''}`;
   tile.dataset.tileIndex = tileValue.toString();
+  if (gridIndex !== undefined) {
+    tile.dataset.gridIndex = gridIndex.toString();
+  }
   
-  if (!isEmpty) {
+  if (!isEmpty && imageData) {
     const img = document.createElement('img');
-    img.src = imageUrl;
+    img.src = imageData.url;
     img.alt = `Tile ${tileValue + 1}`;
     
-    // Calculate crop position for this tile
-    // Each tile should show 1/size of the image
+    // Calculate which portion of the image this tile should show
+    // tileValue 0-8 represents the original position (0,0) through (2,2)
     const row = Math.floor(tileValue / size);
     const col = tileValue % size;
     
-    // Calculate the position and size for cropping
-    // object-position uses percentages, and we need to position
-    // the image so the correct tile is visible
-    const tileWidthPercent = 100 / size;
-    const xOffset = col * tileWidthPercent;
-    const yOffset = row * tileWidthPercent;
+    // Calculate the square crop (center crop) in the original image
+    const sourceX = (imageData.width - imageData.squareSize) / 2;
+    const sourceY = (imageData.height - imageData.squareSize) / 2;
     
-    // Scale image to show the correct portion
-    img.style.width = `${size * 100}%`;
-    img.style.height = `${size * 100}%`;
+    // Calculate tile size within the square
+    const tileSizeInSquare = imageData.squareSize / size;
+    
+    // Calculate the position of this tile within the square
+    const tileXInSquare = col * tileSizeInSquare;
+    const tileYInSquare = row * tileSizeInSquare;
+    
+    // Calculate the absolute position in the original image
+    const absoluteX = sourceX + tileXInSquare;
+    const absoluteY = sourceY + tileYInSquare;
+    
+    // Scale the image so that the square portion fills size * 100% of the container
+    // For a 3x3 grid, we want the square (which is 1/1 of the square) to be 300% of container
+    // So the full image needs to be scaled proportionally
+    // If squareSize is the size we want to show at 300%, then:
+    // imageScale = (imageData.width / imageData.squareSize) * size * 100
+    const imageScalePercent = (imageData.width / imageData.squareSize) * size * 100;
+    
+    // Calculate object-position to align the tile correctly
+    // object-position is a percentage of (image size - container size)
+    // We want the point (absoluteX, absoluteY) to be at the top-left of the container
+    // Formula: position = (point - container/2) / (image - container) * 100
+    // But since we're using percentages, it's simpler:
+    // We want absoluteX to align with the left edge, so:
+    const xPercent = (absoluteX / imageData.width) * 100;
+    const yPercent = (absoluteY / imageData.height) * 100;
+    
+    // Apply styles for CSS cropping
+    img.style.width = `${imageScalePercent}%`;
+    img.style.height = `${imageScalePercent}%`;
     img.style.objectFit = 'none';
-    img.style.objectPosition = `${xOffset}% ${yOffset}%`;
+    img.style.objectPosition = `${xPercent}% ${yPercent}%`;
     
     tile.appendChild(img);
   }
@@ -160,14 +257,20 @@ function renderPuzzle(): void {
   const { grid, size } = gameState.puzzle;
   const emptyValue = size * size - 1;
   
+  // Update grid CSS class for size
+  puzzleGrid.className = `puzzle-grid size-${size}`;
+  
+  // Clear hint highlighting
+  gameState.hintActive = false;
+  
   for (let i = 0; i < grid.length; i++) {
     const tileValue = grid[i];
     const isEmpty = tileValue === emptyValue;
     const tile = createTileElement(
       tileValue,
-      gameState.dailyState.imageUrl,
       size,
-      isEmpty
+      isEmpty,
+      i
     );
     
     // Add click handler
@@ -177,6 +280,9 @@ function renderPuzzle(): void {
     
     puzzleGrid.appendChild(tile);
   }
+  
+  // Update hint button state
+  hintButton.disabled = gameState.isSolved;
 }
 
 /**
@@ -201,6 +307,7 @@ function handleTileClick(tileIndex: number): void {
   if (isSolved(gameState.puzzle)) {
     gameState.isSolved = true;
     stopTimer();
+    hintButton.disabled = true;
     showSolvedOverlay();
   } else {
     renderPuzzle();
@@ -223,20 +330,143 @@ function resetPuzzle(): void {
   if (!gameState.dailyState) return;
   
   gameState.puzzle = createShuffledPuzzle(
-    PUZZLE_SIZE,
+    gameState.difficulty,
     gameState.dailyState.shuffleSeed
   );
   gameState.stats.moves = 0;
   gameState.stats.startTime = 0;
   gameState.stats.elapsedTime = 0;
   gameState.isSolved = false;
+  gameState.hintActive = false;
   
   stopTimer();
   updateMovesDisplay();
   timeDisplay.textContent = '00:00';
   solvedOverlay.style.display = 'none';
+  hintButton.disabled = false;
   
   renderPuzzle();
+}
+
+/**
+ * Handle difficulty change
+ */
+function handleDifficultyChange(newDifficulty: Difficulty): void {
+  if (gameState.difficulty === newDifficulty) return;
+  
+  gameState.difficulty = newDifficulty;
+  
+  // Update button states
+  difficultyButtons.forEach(btn => {
+    const btnDifficulty = Number.parseInt(btn.dataset.difficulty || '3') as Difficulty;
+    if (btnDifficulty === newDifficulty) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
+  // Reset puzzle with new difficulty
+  if (gameState.dailyState) {
+    gameState.puzzle = createShuffledPuzzle(
+      newDifficulty,
+      gameState.dailyState.shuffleSeed
+    );
+    gameState.stats.moves = 0;
+    gameState.stats.startTime = 0;
+    gameState.stats.elapsedTime = 0;
+    gameState.isSolved = false;
+    gameState.hintActive = false;
+    
+    stopTimer();
+    updateMovesDisplay();
+    timeDisplay.textContent = '00:00';
+    solvedOverlay.style.display = 'none';
+    hintButton.disabled = false;
+    
+    // Reload image for new size
+    if (gameState.dailyState) {
+      void loadImageForCropping(gameState.dailyState.imageUrl, newDifficulty).then(() => {
+        renderPuzzle();
+      });
+    }
+  }
+}
+
+/**
+ * Get the next best move for hint
+ * Returns the index of the tile that should be moved next
+ */
+function getNextMoveHint(puzzle: PuzzleState): number | null {
+  // Simple heuristic: find the tile that's furthest from its correct position
+  // and can be moved towards it
+  let bestTile: number | null = null;
+  let bestScore = -1;
+  
+  const { grid, emptyIndex, size } = puzzle;
+  
+  // Get all valid moves (tiles adjacent to empty space)
+  const validMoves: number[] = [];
+  const row = Math.floor(emptyIndex / size);
+  const col = emptyIndex % size;
+  
+  if (row > 0) validMoves.push(emptyIndex - size); // Up
+  if (row < size - 1) validMoves.push(emptyIndex + size); // Down
+  if (col > 0) validMoves.push(emptyIndex - 1); // Left
+  if (col < size - 1) validMoves.push(emptyIndex + 1); // Right
+  
+  // Score each valid move by how much closer it gets to its target
+  for (const tileIndex of validMoves) {
+    const tileValue = grid[tileIndex];
+    const targetIndex = tileValue;
+    
+    // Calculate Manhattan distance from current position to target
+    const currentRow = Math.floor(tileIndex / size);
+    const currentCol = tileIndex % size;
+    const targetRow = Math.floor(targetIndex / size);
+    const targetCol = targetIndex % size;
+    
+    const currentDist = Math.abs(currentRow - targetRow) + Math.abs(currentCol - targetCol);
+    
+    // Calculate distance if we move this tile to empty space
+    const newRow = Math.floor(emptyIndex / size);
+    const newCol = emptyIndex % size;
+    const newDist = Math.abs(newRow - targetRow) + Math.abs(newCol - targetCol);
+    
+    // Score is how much closer we get (negative means further, positive means closer)
+    const score = currentDist - newDist;
+    
+    if (score > bestScore) {
+      bestScore = score;
+      bestTile = tileIndex;
+    }
+  }
+  
+  return bestTile;
+}
+
+/**
+ * Show hint by highlighting the next best move
+ */
+function showHint(): void {
+  if (!gameState.puzzle || gameState.isSolved || gameState.hintActive) return;
+  
+  const hintTileIndex = getNextMoveHint(gameState.puzzle);
+  
+  if (hintTileIndex !== null) {
+    gameState.hintActive = true;
+    const tile = puzzleGrid.querySelector(`[data-grid-index="${hintTileIndex}"]`) as HTMLElement;
+    
+    if (tile && !tile.classList.contains('empty')) {
+      tile.classList.add('hint-highlight');
+      
+      // Remove hint after 3 seconds
+      setTimeout(() => {
+        tile.classList.remove('hint-highlight');
+        gameState.hintActive = false;
+      }, 3000);
+    }
+  }
 }
 
 /**
@@ -252,51 +482,23 @@ async function initGame(): Promise<void> {
     const dailyState = await fetchDailyState();
     gameState.dailyState = dailyState;
     
-    // Create shuffled puzzle
+    // Create shuffled puzzle with current difficulty
     gameState.puzzle = createShuffledPuzzle(
-      PUZZLE_SIZE,
+      gameState.difficulty,
       dailyState.shuffleSeed
     );
     
-    // Wait for image to load
-    // Note: Reddit images may have CORS restrictions, so we try without crossOrigin first
-    await new Promise<void>((resolve, reject) => {
-      const img = new Image();
-      
-      // Try with crossOrigin first, but fallback to without if it fails
-      let triedCrossOrigin = false;
-      
-      const tryLoad = (useCrossOrigin: boolean) => {
-        const newImg = new Image();
-        if (useCrossOrigin) {
-          newImg.crossOrigin = 'anonymous';
-        }
-        
-        newImg.onload = () => {
-          gameState.imageLoaded = true;
-          resolve();
-        };
-        
-        newImg.onerror = (error) => {
-          console.error('Image load error:', error);
-          if (!triedCrossOrigin && useCrossOrigin) {
-            // Try again without crossOrigin
-            triedCrossOrigin = true;
-            tryLoad(false);
-          } else {
-            reject(new Error(`Failed to load puzzle image from: ${dailyState.imageUrl}`));
-          }
-        };
-        
-        newImg.src = dailyState.imageUrl;
-      };
-      
-      tryLoad(true);
-    });
+    // Load and measure the image for CSS cropping
+    loadingEl.textContent = 'Loading puzzle image...';
+    await loadImageForCropping(dailyState.imageUrl, gameState.difficulty);
+    gameState.imageLoaded = true;
     
     // Render puzzle
     loadingEl.style.display = 'none';
     puzzleGrid.style.display = 'grid';
+    if (hintContainer) {
+      hintContainer.classList.add('visible');
+    }
     renderPuzzle();
     
     updateMovesDisplay();
@@ -321,8 +523,35 @@ async function initGame(): Promise<void> {
   }
 }
 
+/**
+ * Handle back button click
+ */
+async function handleBackClick(event: PointerEvent): Promise<void> {
+  try {
+    await exitExpandedMode(event);
+  } catch (error) {
+    console.error('Failed to exit expanded mode:', error);
+    // Fallback: try to navigate back using browser history if available
+    if (window.history.length > 1) {
+      window.history.back();
+    }
+  }
+}
+
 // Event listeners
 resetButton.addEventListener('click', resetPuzzle);
+backButton.addEventListener('click', (e) => {
+  void handleBackClick(e);
+});
+hintButton.addEventListener('click', showHint);
+
+// Difficulty selector event listeners
+difficultyButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const difficulty = Number.parseInt(btn.dataset.difficulty || '3') as Difficulty;
+    handleDifficultyChange(difficulty);
+  });
+});
 
 // Initialize on load
 void initGame();
