@@ -1,0 +1,70 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "rufflexp",
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "inline": true,
+        "entry": "splash.html"
+      },
+      "game": {
+        "entry": "game.html"
+      }
+    }
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "permissions": {
+    "redis": true,
+    "reddit": true
+  },
+  "scheduler": {
+    "tasks": {
+      "daily-fetch": {
+        "endpoint": "/internal/scheduler/daily-fetch",
+        "cron": "0 0 * * *"
+      }
+    }
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "Create a new post",
+        "description": "rufflexp",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/post-create"
+      },
+      {
+        "label": "Fetch Daily Puzzle",
+        "description": "Manually trigger daily puzzle fetch",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/fetch-daily"
+      },
+      {
+        "label": "Example form",
+        "description": "Show a simple form",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/example-form"
+      }
+    ]
+  },
+  "forms": {
+    "exampleForm": "/internal/form/example-submit"
+  },
+  "triggers": {
+    "onAppInstall": "/internal/triggers/on-app-install"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  },
+  "dev": {
+    "subreddit": "rufflexp_dev"
+  }
+}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" type="text/css" href="game.css" />
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width, height=device-height, user-scalable=0"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="full-screen" content="yes" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="360-fullscreen" content="true" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  </head>
+  <body>
+    <div class="game-container">
+      <div class="header">
+        <h1 class="title">RuffleXP</h1>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Time:</span>
+            <span class="stat-value" id="time-display">00:00</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Moves:</span>
+            <span class="stat-value" id="moves-display">0</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="puzzle-container" id="puzzle-container">
+        <div class="loading" id="loading">Loading daily puzzle...</div>
+        <div class="error" id="error" style="display: none;"></div>
+        <div class="puzzle-grid" id="puzzle-grid" style="display: none;"></div>
+      </div>
+      
+      <div class="solved-overlay" id="solved-overlay" style="display: none;">
+        <div class="solved-content">
+          <h2>🎉 Puzzle Solved!</h2>
+          <p>Time: <span id="final-time"></span></p>
+          <p>Moves: <span id="final-moves"></span></p>
+          <button class="reset-button" id="reset-button">Play Again</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="game.ts" defer></script>
+  </body>
+</html>
