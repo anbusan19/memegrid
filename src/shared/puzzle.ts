@@ -44,7 +44,9 @@ export function seededShuffle<T>(array: T[], rng: SeededRandom): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(rng.next() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    const temp = shuffled[i]!;
+    shuffled[i] = shuffled[j]!;
+    shuffled[j] = temp;
   }
   return shuffled;
 }
@@ -55,10 +57,12 @@ export function seededShuffle<T>(array: T[], rng: SeededRandom): T[] {
 function countInversions(grid: number[], size: number): number {
   let inversions = 0;
   for (let i = 0; i < grid.length; i++) {
-    if (grid[i] === size * size - 1) continue; // Skip empty tile
+    const valI = grid[i];
+    if (valI === undefined || valI === size * size - 1) continue; // Skip empty tile
     for (let j = i + 1; j < grid.length; j++) {
-      if (grid[j] === size * size - 1) continue; // Skip empty tile
-      if (grid[i] > grid[j]) inversions++;
+      const valJ = grid[j];
+      if (valJ === undefined || valJ === size * size - 1) continue; // Skip empty tile
+      if (valI > valJ) inversions++;
     }
   }
   return inversions;
@@ -110,7 +114,12 @@ export function createShuffledPuzzle(size: number, seed: number): PuzzleState {
     if (attempts > 100) {
       // Fallback: if we can't find a solvable config, use a simple swap
       grid = [...solvedGrid];
-      [grid[totalTiles - 1], grid[totalTiles - 2]] = [grid[totalTiles - 2], grid[totalTiles - 1]];
+      const last = grid[totalTiles - 1];
+      const secondLast = grid[totalTiles - 2];
+      if (last !== undefined && secondLast !== undefined) {
+        grid[totalTiles - 1] = secondLast;
+        grid[totalTiles - 2] = last;
+      }
       break;
     }
   } while (!isSolvable(grid, size));
@@ -161,10 +170,15 @@ export function makeMove(
   }
   
   const newGrid = [...puzzle.grid];
-  [newGrid[tileIndex], newGrid[puzzle.emptyIndex]] = [
-    newGrid[puzzle.emptyIndex],
-    newGrid[tileIndex],
-  ];
+  const tileValue = newGrid[tileIndex];
+  const emptyValue = newGrid[puzzle.emptyIndex];
+  
+  if (tileValue === undefined || emptyValue === undefined) {
+    return null;
+  }
+  
+  newGrid[tileIndex] = emptyValue;
+  newGrid[puzzle.emptyIndex] = tileValue;
   
   return {
     grid: newGrid,

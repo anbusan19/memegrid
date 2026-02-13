@@ -12,7 +12,7 @@ export const scheduler = new Hono();
 export async function fetchDailyPuzzle(): Promise<{ success: boolean; message: string }> {
   try {
     // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]!;
     
     // Check if we already have today's puzzle
     const existingState = await redis.get(`daily_state:${today}`);
@@ -37,17 +37,11 @@ export async function fetchDailyPuzzle(): Promise<{ success: boolean; message: s
     }
 
     // Get image URL from post
-    // Priority: full-res preview > direct image URL > thumbnail (last resort)
+    // Priority: direct image URL > thumbnail (last resort)
     // Thumbnails are ~140px and look pixelated when stretched across the puzzle grid.
     let imageUrl: string | undefined;
 
-    if (post.preview?.images?.[0]?.source?.url) {
-      // Reddit preview source is the full-resolution version
-      let previewUrl = post.preview.images[0].source.url;
-      // Decode HTML entities (common in Reddit preview URLs)
-      previewUrl = previewUrl.replace(/&amp;/g, '&');
-      imageUrl = previewUrl;
-    } else if (post.url && /\.(jpg|jpeg|png|gif|webp)$/i.test(post.url)) {
+    if (post.url && /\.(jpg|jpeg|png|gif|webp)$/i.test(post.url)) {
       imageUrl = post.url;
     } else if (post.thumbnail?.url && post.thumbnail.url !== 'self' && post.thumbnail.url !== 'default') {
       // Thumbnail is the lowest quality – only use as a last resort
@@ -59,8 +53,6 @@ export async function fetchDailyPuzzle(): Promise<{ success: boolean; message: s
       id: post.id,
       url: post.url,
       thumbnail: post.thumbnail,
-      hasPreview: !!post.preview?.images?.[0],
-      previewUrl: post.preview?.images?.[0]?.source?.url,
       extractedImageUrl: imageUrl,
     });
 
@@ -74,8 +66,9 @@ export async function fetchDailyPuzzle(): Promise<{ success: boolean; message: s
     const seed = hashString(today);
 
     // Create daily state
+    // imageUrl is guaranteed to be defined here due to the check above
     const dailyState: DailyState = {
-      imageUrl,
+      imageUrl: imageUrl,
       postId: post.id,
       shuffleSeed: seed,
       date: today,
@@ -104,7 +97,7 @@ export async function fetchDailyPuzzle(): Promise<{ success: boolean; message: s
  */
 scheduler.post('/daily-fetch', async (c) => {
   try {
-    const input = await c.req.json<TaskRequest>();
+    await c.req.json<TaskRequest>();
     console.log(`[SCHEDULER] Daily fetch job triggered at ${new Date().toISOString()}`);
 
     const result = await fetchDailyPuzzle();

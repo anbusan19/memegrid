@@ -1,4 +1,4 @@
-# RuffleXP: The Daily Meme Scramble
+# MemeJak: The Daily Meme Scramble
 
 A daily sliding-tile puzzle game powered by Reddit’s hottest content.
 
@@ -8,7 +8,7 @@ Unscramble the internet's favorite image of the day and beat the clock.
 
 ## Project Overview
 
-**RuffleXP** is a daily sliding-tile puzzle game built on the **Reddit Devvit Platform**.
+**MemeJak** is a daily sliding-tile puzzle game built on the **Reddit Devvit Platform**.
 
 Every 24 hours, the game automatically fetches the top "Hot" post from a chosen subreddit (e.g., `r/memes` or `r/pics`). The image is sliced into a grid (3x3 - easy, 4x4 - medium, or 5x5 - hard) and shuffled.
 
@@ -219,11 +219,11 @@ devvit upload
 1. Clone the repository
 2. Run the upload command
 3. Open your test subreddit
-4. Launch the **RuffleXP** menu item
+4. Launch the **MemeJak** menu item
 
 ---
 
-## Why RuffleXP?
+## Why MemeJak?
 
 * Turns Reddit’s daily content into an interactive habit
 * Encourages repeat engagement every 24 hours

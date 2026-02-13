@@ -184,7 +184,7 @@ api.post('/submit-score', async (c) => {
     }
 
     // Get today's date
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]!;
 
     // Create leaderboard entry
     const entry: LeaderboardEntry = {
@@ -210,7 +210,10 @@ api.post('/submit-score', async (c) => {
     // If user has a better score (lower time, or same time with fewer moves), update it
     if (existingIndex >= 0) {
       const existing = leaderboard[existingIndex];
-      if (
+      if (!existing) {
+        // Should not happen, but handle it
+        leaderboard.push(entry);
+      } else if (
         time < existing.time ||
         (time === existing.time && moves < existing.moves)
       ) {
@@ -275,7 +278,8 @@ api.post('/submit-score', async (c) => {
  */
 api.get('/leaderboard', async (c) => {
   try {
-    const date = c.req.query('date') || new Date().toISOString().split('T')[0];
+    const dateQuery = c.req.query('date');
+    const date = dateQuery || new Date().toISOString().split('T')[0]!;
     const difficultyStr = c.req.query('difficulty') || '3';
     const difficulty = Number.parseInt(difficultyStr) as 3 | 4 | 5;
 
@@ -298,7 +302,7 @@ api.get('/leaderboard', async (c) => {
 
     return c.json<LeaderboardResponse>({
       entries: leaderboard,
-      date,
+      date: date,
       difficulty,
     });
   } catch (error) {

@@ -33,7 +33,7 @@ function getStoredDifficulty(): Difficulty {
   return 3;
 }
 
-let gameState: GameState = {
+const gameState: GameState = {
   puzzle: null,
   dailyState: null,
   difficulty: getStoredDifficulty(),
@@ -59,6 +59,7 @@ const finalMovesEl = document.getElementById('final-moves') as HTMLSpanElement;
 const resetButton = document.getElementById('reset-button') as HTMLButtonElement;
 const backButton = document.getElementById('back-button') as HTMLButtonElement;
 const hintButton = document.getElementById('hint-button') as HTMLButtonElement;
+const topScorePopup = document.getElementById('top-score-popup') as HTMLDivElement;
 
 let imageUrl: string | null = null;
 
@@ -196,11 +197,51 @@ async function submitScore(): Promise<void> {
     difficulty: gameState.difficulty,
   };
 
-  await fetch('/api/submit-score', {
+  // Check current leaderboard to see if we're beating the top score
+  const today = new Date().toISOString().split('T')[0];
+  const leaderboardResponse = await fetch(
+    `/api/leaderboard?date=${today}&difficulty=${gameState.difficulty}`
+  );
+  let previousTopScore: { time: number; moves: number } | null = null;
+  
+  if (leaderboardResponse.ok) {
+    const leaderboardData = (await leaderboardResponse.json()) as {
+      entries: Array<{ time: number; moves: number }>;
+    };
+    const topEntry = leaderboardData.entries[0];
+    if (topEntry) {
+      previousTopScore = {
+        time: topEntry.time,
+        moves: topEntry.moves,
+      };
+    }
+  }
+
+  const response = await fetch('/api/submit-score', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(scoreRequest),
   });
+
+  if (response.ok) {
+    const result = (await response.json()) as {
+      status: string;
+      rank: number;
+      message: string;
+    };
+
+    // Check if we beat the top score
+    const isNewTopScore =
+      result.rank === 1 &&
+      (previousTopScore === null ||
+        scoreRequest.time < previousTopScore.time ||
+        (scoreRequest.time === previousTopScore.time &&
+          scoreRequest.moves < previousTopScore.moves));
+
+    if (isNewTopScore) {
+      showTopScorePopup();
+    }
+  }
 }
 
 function showSolvedOverlay(): void {
@@ -208,6 +249,17 @@ function showSolvedOverlay(): void {
   finalMovesEl.textContent = gameState.stats.moves.toString();
   solvedOverlay.style.display = 'flex';
   void submitScore();
+}
+
+function showTopScorePopup(): void {
+  if (!topScorePopup) return;
+  
+  topScorePopup.classList.add('show');
+  
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    topScorePopup.classList.remove('show');
+  }, 3000);
 }
 
 function resetPuzzle(): void {
